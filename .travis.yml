@@ -1,3 +1,4 @@
+dist: trusty
 sudo: required
 env:
   matrix:
@@ -17,4 +18,4 @@ before_install:
   
 script:
  # Run tests in Container
-- tests/setup_tests.sh ${OS_VERSION}
+- setup_tests.sh ${OS_VERSION}
