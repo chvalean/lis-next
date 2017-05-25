@@ -1,4 +1,4 @@
 language: bash
 
 script:
-    - bash lis-next/hv-rhel7.x/hv/rhel7-hv-driver-install
+    - bash hv-rhel7.x/hv/rhel7-hv-driver-install
