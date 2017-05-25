@@ -18,4 +18,5 @@ before_install:
   
 script:
  # Run tests in Container
+- pwd
 - setup_tests.sh ${OS_VERSION}
