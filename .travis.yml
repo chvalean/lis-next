@@ -18,5 +18,6 @@ before_install:
   
 script:
  # Run tests in Container
-- pwd
+- pwd && ls
+- chmod ugo+x setup_tests.sh
 - setup_tests.sh ${OS_VERSION}
