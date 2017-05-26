@@ -11,7 +11,10 @@ services:
   
 before_install:
   - sudo apt-get update -q=2
-  - sudo apt-get install linux-headers-generic
+#  - sudo apt-get install linux-headers-generic
+  - sudo apt-get install -y linux-headers-4.4.0-51-generic
+  - sudo ln -s /usr/src/4.4.0-51-generic /lib/modules/4.4.0-51-generic/build
+  - sudo ls /lib/modules
   - echo 'DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock -s devicemapper"' | sudo tee /etc/default/docker > /dev/null
   - sudo service docker restart
   - sleep 5
