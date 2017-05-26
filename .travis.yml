@@ -14,7 +14,7 @@ before_install:
   - sudo service docker restart
   - sleep 5
   #- sudo docker pull centos:centos${OS_VERSION}
-  - sudo docker pull centos:centos7.2.1511
+  - sudo docker pull centos:7.2.1511
 
 script:
  # Run tests in Container
