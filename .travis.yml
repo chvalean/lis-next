@@ -15,8 +15,8 @@ before_install:
   - sudo apt-get install -y linux-headers-4.4.0-51-generic
  # - sudo dpkg -l | grep linux-headers
  # - sudo apt-cache search linux-headers*
-  - sudo ln -s /usr/src/4.4.0-51-generic /lib/modules/4.4.0-51-generic/build
-  - sudo ls /lib/modules/4.4.0-51-generic/
+  - sudo ln -s /usr/src/linux-headers-4.4.0-51-generic /lib/modules/4.4.0-51-generic/build
+  - sudo ls /usr/src/linux-headers-4.4.0-51-generic/ -lha
   - sudo ls /lib/modules/4.4.0-51-generic/build
   - sudo ls /usr/src/
   - echo 'DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock -s devicemapper"' | sudo tee /etc/default/docker > /dev/null
