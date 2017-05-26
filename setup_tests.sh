@@ -17,7 +17,7 @@ DOCKER_CONTAINER_ID=$(docker ps | grep centos | awk '{print $1}')
 docker logs $DOCKER_CONTAINER_ID
 docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "bash -xe setup_tests.sh;
   echo -ne \"------\nEND HTCONDOR-CE TESTS\n\";"
-docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y install automake make kernel-devel"
+docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y install automake make kernel-devel gcc"
 docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "mkdir /lib/modules/4.4.0-51-generic"
 docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "ln -s /usr/src/kernels/3.10.0-514.21.1.el7.x86_64 /lib/modules/4.4.0-51-generic/build"
 docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "ls -lha /usr/src/kernels/3.10.0-514.21.1.el7.x86_64/"
