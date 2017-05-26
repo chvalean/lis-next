@@ -18,6 +18,7 @@ docker logs $DOCKER_CONTAINER_ID
 docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "bash -xe setup_tests.sh;
   echo -ne \"------\nEND HTCONDOR-CE TESTS\n\";"
 docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y install automake make kernel-devel-`uname -r`"
+docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "ls /lib/modules/4.4.0-51-generic/ && ls /lib/modules/4.4.0-51-generic/build && ls /usr/src/"
 docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "bash -xe /home/travis/build/chvalean/lis-next/hv-rhel7.x/hv/rhel7-hv-driver-install"
 docker ps -a
 docker stop $DOCKER_CONTAINER_ID
