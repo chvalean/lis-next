@@ -12,10 +12,10 @@ sudo docker run --rm=true -v `pwd`:/htcondor-ce:rw centos:centos${OS_VERSION} /b
 
 elif [ "$el_version" = "7" ]; then
 
-docker run --privileged -d -ti -e "container=docker"  -v /sys/fs/cgroup:/sys/fs/cgroup -v `pwd`:/htcondor-ce:rw  centos:centos${OS_VERSION}   /usr/sbin/init
+docker run --privileged -d -ti -e "container=docker"  -v /sys/fs/cgroup:/sys/fs/cgroup -v `pwd`:/lis-next:rw  centos:centos${OS_VERSION}   /usr/sbin/init
 DOCKER_CONTAINER_ID=$(docker ps | grep centos | awk '{print $1}')
 docker logs $DOCKER_CONTAINER_ID
-docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "bash -xe ls && echo ${OS_VERSION};
+docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "bash -xe setup_tests.sh;
   echo -ne \"------\nEND HTCONDOR-CE TESTS\n\";"
 docker ps -a
 docker stop $DOCKER_CONTAINER_ID
