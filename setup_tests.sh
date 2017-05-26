@@ -17,7 +17,8 @@ DOCKER_CONTAINER_ID=$(docker ps | grep centos | awk '{print $1}')
 docker logs $DOCKER_CONTAINER_ID
 docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "bash -xe setup_tests.sh;
   echo -ne \"------\nEND HTCONDOR-CE TESTS\n\";"
-docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "ls /home && ls /home/travis/build"
+docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "bash -xe /home/travis/build/chvalean/lis-next/setup_tests.sh"
+docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "ls /home/travis/build/chvalean/lis-next/"
 docker ps -a
 docker stop $DOCKER_CONTAINER_ID
 docker rm -v $DOCKER_CONTAINER_ID
