@@ -17,9 +17,10 @@ DOCKER_CONTAINER_ID=$(docker ps | grep centos | awk '{print $1}')
 docker logs $DOCKER_CONTAINER_ID
 docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "bash -xe setup_tests.sh;
   echo -ne \"------\nEND HTCONDOR-CE TESTS\n\";"
-docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y install automake make kernel-headers-`uname -r`"
+docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y install automake make kernel-devel"
 docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "ls /lib/modules/"
-docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "ls /usr/src/"
+docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "ls /usr/src/kernels/"
+docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "ls /usr/src/kernels/4.4.0-51-generic"
 docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "bash -xe /home/travis/build/chvalean/lis-next/hv-rhel7.x/hv/rhel7-hv-driver-install"
 docker ps -a
 docker stop $DOCKER_CONTAINER_ID
