@@ -1,5 +1,5 @@
-dist: trusty
-sudo: required
+#dist: trusty
+#sudo: required
 
 env:
   matrix:
@@ -10,15 +10,16 @@ services:
   - docker
   
 before_install:
-  - sudo apt-get update -q=2
+  - sudo apt-get update -qq
 #  - sudo apt-get install linux-headers-generic
-  - sudo apt-get install -y linux-headers-4.4.0-51-generic
+  - sudo apt-get install -y linux-headers-`uname -r`-generic linux-headers-generic
  # - sudo dpkg -l | grep linux-headers
  # - sudo apt-cache search linux-headers*
-  - sudo ln -s /usr/src/linux-headers-4.4.0-51-generic /lib/modules/4.4.0-51-generic/build
-  - sudo ls /usr/src/linux-headers-4.4.0-51-generic/ -lha
-  - sudo ls /lib/modules/4.4.0-51-generic/build
+ # - sudo ln -s /usr/src/linux-headers-4.4.0-51-generic /lib/modules/4.4.0-51-generic/build
+ # - sudo ls /usr/src/linux-headers-4.4.0-51-generic/ -lha
+ # - sudo ls /lib/modules/4.4.0-51-generic/build
   - sudo ls /usr/src/
+  - sudo ls /lib/modules/
   - echo 'DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock -s devicemapper"' | sudo tee /etc/default/docker > /dev/null
   - sudo service docker restart
   - sleep 5
