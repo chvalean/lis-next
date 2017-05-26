@@ -7,11 +7,12 @@ el_version="7"
 
  # Run tests in Container
 if [ "$el_version" = "6" ]; then
-	sudo docker run --rm=true -v `pwd`:/htcondor-ce:rw centos:centos${OS_VERSION} /bin/bash -c "bash -xe ls /root/"
+	sudo docker run --rm=true -v `pwd`:/home/travis/build/chvalean/lis-next:rw centos:centos${OS_VERSION} /bin/bash -c "bash -xe ls /root/"
 elif [ "$el_version" = "7" ]; then
 	docker run --privileged -d -ti -e "container=docker"  -v /sys/fs/cgroup:/sys/fs/cgroup -v `pwd`:/home/travis/build/chvalean/lis-next:rw  centos:centos${OS_VERSION}   /usr/sbin/init
 	DOCKER_CONTAINER_ID=$(docker ps | grep centos | awk '{print $1}')
 	docker logs $DOCKER_CONTAINER_ID
+	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "cat /etc/centos-release"
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y -q install automake make kernel-devel gcc"
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "mkdir -p /lib/modules/$(uname -r)/extra"
 	# work-around to skip warning during install, we won't boot the new kernel
