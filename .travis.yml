@@ -1,5 +1,7 @@
 dist: trusty
 sudo: required
+install: make get-deps
+
 env:
   matrix:
 #  - OS_TYPE=centos OS_VERSION=6
