@@ -14,7 +14,7 @@ elif [ "$el_version" = "7" ]; then
 	docker logs $DOCKER_CONTAINER_ID
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "cat /etc/centos-release"
 	#docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y -q update"
-	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y install automake make gcc"
+	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y install automake make gcc wget"
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "wget -q -O - http://vault.centos.org/7.2.1511/os/x86_64/Packages/kernel-devel-3.10.0-327.el7.x86_64.rpm"
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "rpm -ivh kernel-devel-3.10.0-327.el7.x86_64.rpm"
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "mkdir -p /lib/modules/$(uname -r)/extra"
