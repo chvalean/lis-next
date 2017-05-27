@@ -13,7 +13,9 @@ elif [ "$el_version" = "7" ]; then
 	DOCKER_CONTAINER_ID=$(docker ps | grep centos | awk '{print $1}')
 	docker logs $DOCKER_CONTAINER_ID
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "cat /etc/centos-release"
-	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y -q install automake make kernel-devel gcc"
+	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y -q update"
+	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y install automake make kernel-devel gcc"
+	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "yum search kernel-devel"
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "mkdir -p /lib/modules/$(uname -r)/extra"
 	# work-around to skip warning during install, we won't boot the new kernel
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "touch /lib/modules/$(uname -r)/modules.order"
