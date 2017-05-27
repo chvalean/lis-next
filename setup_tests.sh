@@ -14,14 +14,13 @@ elif [ "$el_version" = "7" ]; then
 	docker logs $DOCKER_CONTAINER_ID
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "cat /etc/centos-release"
 	#docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y -q update"
-	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y install automake make gcc kernel-devel-3.10.0-327"
-	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "yum search kernel-devel"
+	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y install automake make gcc kernel-devel-3.10.0-327.el7.x86_64"
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "mkdir -p /lib/modules/$(uname -r)/extra"
 	# work-around to skip warning during install, we won't boot the new kernel
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "touch /lib/modules/$(uname -r)/modules.order"
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "touch /lib/modules/$(uname -r)/modules.builtin"
 	
-	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "ln -s /usr/src/kernels/3.10.0-514.21.1.el7.x86_64 /lib/modules/4.4.0-51-generic/build"
+	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "ln -s /usr/src/kernels/3.10.0-327.el7.x86_64 /lib/modules/4.4.0-51-generic/build"
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "cd /home/travis/build/chvalean/lis-next/hv-rhel7.x/hv/ ; bash -e rhel7-hv-driver-install"
 	docker stop $DOCKER_CONTAINER_ID
 	docker rm -v $DOCKER_CONTAINER_ID
