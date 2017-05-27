@@ -1,5 +1,5 @@
 #dist: trusty
-#sudo: required
+sudo: false
 
 env:
   matrix:
@@ -11,10 +11,12 @@ services:
   
 before_install:
   - echo 'DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock -s devicemapper"' | sudo tee /etc/default/docker > /dev/null
-  - sudo service docker restart
+  #- sudo service docker restart
+  - service docker restart
   - sleep 5
   #- sudo docker pull centos:centos${OS_VERSION}
-  - sudo docker pull centos:7.2.1511
+  #- sudo docker pull centos:7.2.1511
+  - docker pull centos:7.2.1511
 
 script:
  # Run tests in Container
