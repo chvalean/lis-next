@@ -1,4 +1,4 @@
-sudo: required
+sudo: false
 dist: trusty
 
 env:
@@ -12,8 +12,11 @@ services:
   - docker
 
 before_install:
+  - apt-get update
+  - apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y docker-engine
   - docker pull $CENTOS
   - docker ps -a
+  - docker ps
   - docker --version
 
 script:
