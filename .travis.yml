@@ -3,11 +3,10 @@ dist: trusty
 
 env:
   matrix:
-  #- CENTOS=centos:latest KERNEL=3.10.0-514.21.1
-  - CENTOS=centos:7.3.1611 KERNEL=3.10.0-514
-  - CENTOS=centos:7.2.1511 KERNEL=3.10.0-327
-  - CENTOS=centos:7.1.1503 KERNEL=3.10.0-229
-  - CENTOS=centos:7.0.1406 KERNEL=3.10.0-123
+  - CENTOS=centos:7.3.1611 KERNEL=3.10.0-514 BUILD=7.3.1611
+  - CENTOS=centos:7.2.1511 KERNEL=3.10.0-327 BUILD=7.2.1511
+  - CENTOS=centos:7.1.1503 KERNEL=3.10.0-229 BUILD=7.1.1503
+  - CENTOS=centos:7.0.1406 KERNEL=3.10.0-123 BUILD=7.0.1406
 
 services:
   - docker
