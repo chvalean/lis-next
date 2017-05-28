@@ -11,7 +11,7 @@ if [ "$el_version" = "6" ]; then
 elif [ "$el_version" = "7" ]; then
 	#docker run --privileged -d -ti -e "container=docker"  -v /sys/fs/cgroup:/sys/fs/cgroup -v `pwd`:/home/travis/build/chvalean/lis-next:rw  ${CENTOS}   /usr/sbin/init
 	DOCKER_CONTAINER_ID=$(sudo docker ps | grep centos | awk '{print $1}')
-	docker logs $DOCKER_CONTAINER_ID
+	#docker logs $DOCKER_CONTAINER_ID
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "cat /etc/centos-release"
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y -q install automake make gcc wget"
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "wget -q http://vault.centos.org/${BUILD}/os/x86_64/Packages/kernel-devel-${KERNEL}.el7.x86_64.rpm"
