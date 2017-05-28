@@ -15,14 +15,16 @@ elif [ "$el_version" = "7" ]; then
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "cat /etc/centos-release"
 	#docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y -q update"
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y install automake make gcc wget"
-	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "wget -q http://vault.centos.org/7.2.1511/os/x86_64/Packages/kernel-devel-3.10.0-327.el7.x86_64.rpm"
-	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "rpm -ivh kernel-devel-3.10.0-327.el7.x86_64.rpm"
+	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "wget -q http://vault.centos.org/7.2.1511/os/x86_64/Packages/kernel-devel-${KERNEL}.el7.x86_64.rpm"
+	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "wget -q http://vault.centos.org/7.1.1503/os/x86_64/Packages/kernel-devel-${KERNEL}.el7.x86_64.rpm"
+	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "wget -q http://vault.centos.org/7.3.1611/os/x86_64/Packages/kernel-devel-${KERNEL}.el7.x86_64.rpm"
+	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "rpm -ivh kernel-devel-${KERNEL}.el7.x86_64.rpm"
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "mkdir -p /lib/modules/$(uname -r)/extra"
 	# work-around to skip warning during install, we won't boot the new kernel
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "touch /lib/modules/$(uname -r)/modules.order"
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "touch /lib/modules/$(uname -r)/modules.builtin"
 	
-	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "ln -s /usr/src/kernels/3.10.0-327.el7.x86_64 /lib/modules/4.4.0-51-generic/build"
+	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "ln -s /usr/src/kernels/${KERNEL}.el7.x86_64 /lib/modules/4.4.0-51-generic/build"
 	docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "cd /home/travis/build/chvalean/lis-next/hv-rhel7.x/hv/ ; bash -e rhel7-hv-driver-install"
 	docker stop $DOCKER_CONTAINER_ID
 	docker rm -v $DOCKER_CONTAINER_ID
