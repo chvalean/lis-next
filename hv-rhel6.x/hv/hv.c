@@ -115,7 +115,7 @@ int hv_post_message(union hv_connection_id connection_id,
 static int hv_ce_set_next_event(unsigned long delta,
 				struct clock_event_device *evt)
 {
-	cycle_t current_tick;
+	u64 current_tick;
 
 	WARN_ON(evt->mode != CLOCK_EVT_MODE_ONESHOT);
 
