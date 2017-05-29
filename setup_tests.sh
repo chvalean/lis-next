@@ -12,16 +12,24 @@ docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "cat /etc/centos-release"
 docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y -q install automake make gcc wget"
 docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "wget -q http://vault.centos.org/${BUILD}/os/x86_64/Packages/kernel-devel-${KERNEL}.el7.x86_64.rpm"
 docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "wget -q http://mirror.centos.org/centos/7/os/x86_64/Packages/kernel-devel-${KERNEL}.el7.x86_64.rpm"
-docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "rpm -ivh kernel-devel-${KERNEL}.el7.x86_64.rpm"
+docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "wget -q http://mirror.centos.org/centos/6.8/os/x86_64/Packages/kernel-devel-${KERNEL}.el6.x86_64.rpm"
+docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "rpm -ivh kernel-devel-${KERNEL}*"
 
 # work-around to skip warning during install, we won't boot the new kernel
 docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "mkdir -p /lib/modules/$(uname -r)/extra"
 docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "touch /lib/modules/$(uname -r)/modules.order"
 docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "touch /lib/modules/$(uname -r)/modules.builtin"
 docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "ln -s /usr/src/kernels/${KERNEL}.el7.x86_64 /lib/modules/4.4.0-51-generic/build"
+if [[ "$BUILD" = "6"* ]]; then
+  docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "ln -s /usr/src/kernels/${KERNEL}.el6.x86_64 /lib/modules/4.4.0-51-generic/build"
+fi
 
 # installing lis-next
-docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "cd /home/travis/build/chvalean/lis-next/hv-rhel7.x/hv/ ; bash -e rhel7-hv-driver-install"
+if [[ "$BUILD" = "7"* ]]; then
+  docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "cd /home/travis/build/chvalean/lis-next/hv-rhel7.x/hv/ ; bash -e rhel7-hv-driver-install"
+elif [[ "$BUILD" = "6"* ]]; then
+  docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "cd /home/travis/build/chvalean/lis-next/hv-rhel6.x/hv/ ; bash -e rhel6-hv-driver-install"
+fi
 
 # clean-up container
 docker stop $DOCKER_CONTAINER_ID
