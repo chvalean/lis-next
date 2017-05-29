@@ -13,7 +13,6 @@ elif [ "$el_version" = "7" ]; then
 	DOCKER_CONTAINER_ID=$(sudo docker ps | grep centos | awk '{print $1}')
 	docker logs $DOCKER_CONTAINER_ID
 	docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "cat /etc/centos-release"
-	docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "yum update"
 	docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y -q install automake make gcc wget"
 	docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "wget -q http://vault.centos.org/${BUILD}/os/x86_64/Packages/kernel-devel-${KERNEL}.el7.x86_64.rpm"
 	docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "wget -q http://mirror.centos.org/centos/7/os/x86_64/Packages/kernel-devel-${KERNEL}.el7.x86_64.rpm"
