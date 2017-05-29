@@ -11,8 +11,11 @@ docker logs $DOCKER_CONTAINER_ID
 docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "cat /etc/centos-release"
 docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y -q install automake make gcc wget"
 docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "wget -q http://vault.centos.org/${BUILD}/os/x86_64/Packages/kernel-devel-${KERNEL}.el7.x86_64.rpm"
-docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "wget -q http://mirror.centos.org/centos/7/os/x86_64/Packages/kernel-devel-${KERNEL}.el7.x86_64.rpm"
-docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "wget -q http://mirror.centos.org/centos/6.8/os/x86_64/Packages/kernel-devel-${KERNEL}.el6.x86_64.rpm"
+if [[ "$BUILD" = "7.3.1611" ]]; then
+  docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "wget -q http://mirror.centos.org/centos/7/os/x86_64/Packages/kernel-devel-${KERNEL}.el7.x86_64.rpm"
+elif [[ "$BUILD" = "6"* ]]; then
+  docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "wget -q http://mirror.centos.org/centos/6.8/os/x86_64/Packages/kernel-devel-${KERNEL}.el6.x86_64.rpm"
+fi
 docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "rpm -ivh kernel-devel-${KERNEL}*"
 
 # work-around to skip warning during install, we won't boot the new kernel
