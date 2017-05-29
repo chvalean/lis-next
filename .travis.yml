@@ -15,9 +15,11 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y docker-engine
   - sudo docker pull $CENTOS
-  - sudo docker run -d $CENTOS /bin/sh -c "bash /home/travis/build/chvalean/lis-next/setup_tests.sh"
+  - sudo docker run -d $CENTOS /bin/sh -c "bash /home/travis/build/chvalean/lis-next/setup_tests.sh > log.txt"
   - sudo docker ps -a
   - sudo docker --version
+  - sudo sleep 60
+  - sudo cat /home/travis/build/chvalean/lis-next/log.txt
 
-script:
-  - bash setup_tests.sh
+#script:
+#  - bash setup_tests.sh
