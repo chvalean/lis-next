@@ -22,8 +22,9 @@ docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "rpm -ivh kernel-devel-${KERN
 docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "mkdir -p /lib/modules/$(uname -r)/extra"
 docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "touch /lib/modules/$(uname -r)/modules.order"
 docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "touch /lib/modules/$(uname -r)/modules.builtin"
-docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "ln -s /usr/src/kernels/${KERNEL}.el7.x86_64 /lib/modules/4.4.0-51-generic/build"
-if [[ "$BUILD" == "6.8" ]]; then
+if [[ "$KERNEL" == "3.10."* ]]; then
+  docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "ln -s /usr/src/kernels/${KERNEL}.el7.x86_64 /lib/modules/4.4.0-51-generic/build"
+elif [[ "$BUILD" == "6.8" ]]; then
   docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "ln -s /usr/src/kernels/${KERNEL}.el6.x86_64 /lib/modules/4.4.0-51-generic/build"
 fi
 
