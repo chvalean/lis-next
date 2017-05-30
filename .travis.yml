@@ -8,16 +8,17 @@ env:
   - CENTOS=centos:7.1.1503 KERNEL=3.10.0-229 BUILD=7.1.1503
   - CENTOS=centos:7.0.1406 KERNEL=3.10.0-123 BUILD=7.0.1406
   - CENTOS=centos:6.8 KERNEL=2.6.32-642 BUILD=6.8
+  - CENTOS=centos:6.6 KERNEL=2.6.32-504 BUILD=6.6
 
 services:
   - docker
 
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y docker-engine
-  - sudo docker --version
+  - sudo apt-get install -qq -o Dpkg::Options::="--force-confold" --force-yes -y docker-engine
+#  - sudo docker --version
   - sudo docker pull $CENTOS
-  - sudo docker ps -a
+#  - sudo docker ps -a
 
 script:
   - bash setup_tests.sh
