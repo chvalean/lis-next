@@ -13,8 +13,8 @@ docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y -q install automake m
 docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "wget -q http://vault.centos.org/${BUILD}/os/x86_64/Packages/kernel-devel-${KERNEL}.el7.x86_64.rpm"
 if [[ "$BUILD" == "7.3.1611" ]]; then
   docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "wget -q http://mirror.centos.org/centos/7/os/x86_64/Packages/kernel-devel-${KERNEL}.el7.x86_64.rpm"
-elif [[ "$BUILD" == "6.8" ]]; then
-  docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "wget -q http://mirror.centos.org/centos/6.8/os/x86_64/Packages/kernel-devel-${KERNEL}.el6.x86_64.rpm"
+elif [[ "$BUILD" == "6."* ]]; then
+  docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "wget -q http://mirror.centos.org/centos/${BUILD}/os/x86_64/Packages/kernel-devel-${KERNEL}.el6.x86_64.rpm"
 fi
 docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "rpm -ivh kernel-devel-${KERNEL}*"
 
@@ -24,14 +24,14 @@ docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "touch /lib/modules/$(uname -
 docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "touch /lib/modules/$(uname -r)/modules.builtin"
 if [[ "$KERNEL" == "3.10."* ]]; then
   docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "ln -s /usr/src/kernels/${KERNEL}.el7.x86_64 /lib/modules/4.4.0-51-generic/build"
-elif [[ "$BUILD" == "6.8" ]]; then
+elif [[ "$BUILD" == "6."* ]]; then
   docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "ln -s /usr/src/kernels/${KERNEL}.el6.x86_64 /lib/modules/4.4.0-51-generic/build"
 fi
 
 # installing lis-next
 if [[ "$BUILD" == "7"* ]]; then
   docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "cd /home/travis/build/chvalean/lis-next/hv-rhel7.x/hv/ ; bash -e rhel7-hv-driver-install"
-elif [[ "$BUILD" == "6.8" ]]; then
+elif [[ "$BUILD" == "6."* ]]; then
   docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "cd /home/travis/build/chvalean/lis-next/hv-rhel6.x/hv/ ; bash -e rhel6-hv-driver-install"
 fi
 
