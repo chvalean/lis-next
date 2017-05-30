@@ -119,7 +119,7 @@ static int hv_ce_set_next_event(unsigned long delta,
 
 	WARN_ON(evt->mode != CLOCK_EVT_MODE_ONESHOT);
 
-	current_tick = hyperv_cs->read(NULL);
+	hv_get_current_tick(current_tick);
 	current_tick += delta;
 	hv_init_timer(HV_X64_MSR_STIMER0_COUNT, current_tick);
 	return 0;
