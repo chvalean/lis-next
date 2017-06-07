@@ -24,7 +24,6 @@
 #include <linux/interrupt.h>
 #include <linux/sched.h>
 #include <linux/wait.h>
-#include <linux/delay.h>
 #include <linux/mm.h>
 #include <linux/slab.h>
 #include <linux/list.h>
@@ -203,10 +202,6 @@ static u16 hv_get_dev_type(const struct vmbus_channel *channel)
 	return i;
 }
 
-struct vmbus_rescind_work {
-	struct work_struct work;
-	struct vmbus_channel *channel;
-};
 
 /**
  * vmbus_prep_negotiate_resp() - Create default response for Hyper-V Negotiate message
@@ -366,40 +361,6 @@ static void free_channel(struct vmbus_channel *channel)
 	kfree_rcu(channel, rcu);
 }
 
-static void process_rescind_fn(struct work_struct *work)
-{
-	struct vmbus_rescind_work *rc_work;
-	struct vmbus_channel *channel;
-	struct device *dev;
-
-	rc_work = container_of(work, struct vmbus_rescind_work, work);
-	channel = rc_work->channel;
-
-	/*
-	 * We have already acquired a reference on the channel
-	 * and so it cannot vanish underneath us.
-	 * It is possible (while very unlikely) that we may
-	 * get here while the processing of the initial offer
-	 * is still not complete. Deal with this situation by
-	 * just waiting until the channel is in the correct state.
-	 */
-
-	while (channel->work.func != release_channel)
-		msleep(1000);
-
-	if (channel->device_obj) {
-		dev = get_device(&channel->device_obj->device);
-		if (dev) {
-			vmbus_device_unregister(channel->device_obj);
-			put_device(dev);
-		}
-	} else {
-		hv_process_channel_removal(channel,
-					   channel->offermsg.child_relid);
-	}
-	kfree(work);
-}
-
 static void percpu_channel_enq(void *arg)
 {
 	struct vmbus_channel *channel = arg;
@@ -484,45 +445,6 @@ void vmbus_free_channels(void)
 	}
 }
 
-static void vmbus_do_device_register(struct work_struct *work)
-{
-	struct hv_device *device_obj;
-	int ret;
-	unsigned long flags;
-	struct vmbus_channel *newchannel = container_of(work,
-						     struct vmbus_channel,
-						     work);
-
-	ret = vmbus_device_register(newchannel->device_obj);
-	if (ret != 0) {
-		pr_err("unable to add child device object (relid %d)\n",
-			newchannel->offermsg.child_relid);
-		spin_lock_irqsave(&vmbus_connection.channel_lock, flags);
-		list_del(&newchannel->listentry);
-		device_obj = newchannel->device_obj;
-		newchannel->device_obj = NULL;
-		spin_unlock_irqrestore(&vmbus_connection.channel_lock, flags);
-
-		if (newchannel->target_cpu != get_cpu()) {
-			put_cpu();
-			smp_call_function_single(newchannel->target_cpu,
-					 percpu_channel_deq, newchannel, true);
-		} else {
-			percpu_channel_deq(newchannel);
-			put_cpu();
-		}
-
-		kfree(device_obj);
-		if (!newchannel->rescind) {
-			free_channel(newchannel);
-			return;
-		}
-	}
-	/*
-	 * The next state for this channel is to be freed.
-	 */
-	INIT_WORK(&newchannel->work, release_channel);
-}
 
 /*
  * vmbus_process_offer - Process the offer by creating a channel/device
@@ -534,6 +456,7 @@ static void vmbus_process_offer(struct vmbus_channel *newchannel)
 	bool fnew = true;
 	unsigned long flags;
 	u16 dev_type;
+	int ret;
 
 	/* Make sure this is a new offer */
 	mutex_lock(&vmbus_connection.channel_mutex);
@@ -619,13 +542,15 @@ static void vmbus_process_offer(struct vmbus_channel *newchannel)
 	 * Add the new device to the bus. This will kick off device-driver
 	 * binding which eventually invokes the device driver's AddDevice()
 	 * method.
-	 * Invoke this call on the per-channel work context.
-	 * Until we return from this function, rescind offer message
-	 * cannot be processed as we are running on the global message
-	 * handling work.
 	 */
-	INIT_WORK(&newchannel->work, vmbus_do_device_register);
-	queue_work(newchannel->controlwq, &newchannel->work);
+	ret = vmbus_device_register(newchannel->device_obj);
+
+	if (ret != 0) {
+		pr_err("unable to add child device object (relid %d)\n",
+			newchannel->offermsg.child_relid);
+		kfree(newchannel->device_obj);
+		goto err_deq_chan;
+	}
 
 	atomic_dec(&vmbus_connection.offer_in_progress);
 	return;
@@ -928,31 +853,86 @@ static void vmbus_onoffer_rescind(struct vmbus_channel_message_header *hdr)
 {
 	struct vmbus_channel_rescind_offer *rescind;
 	struct vmbus_channel *channel;
-	struct vmbus_rescind_work *rc_work;
+	unsigned long flags;
+	struct device *dev;
 
 	rescind = (struct vmbus_channel_rescind_offer *)hdr;
-	channel = relid2channel(rescind->child_relid, true);
-
-	if (channel == NULL) {
-		hv_process_channel_removal(NULL, rescind->child_relid);
-		return;
-	}
 
 	/*
-	 * We have acquired a reference on the channel and have posted
-	 * the rescind state. Perform further cleanup in a work context
-	 * that is different from the global work context in which
-	 * we process messages from the host (we are currently executing
-	 * on that global context.
+	 * The offer msg and the corresponding rescind msg
+	 * from the host are guranteed to be ordered -
+	 * offer comes in first and then the rescind.
+	 * Since we process these events in work elements,
+	 * and with preemption, we may end up processing
+	 * the events out of order. Given that we handle these
+	 * work elements on the same CPU, this is possible only
+	 * in the case of preemption. In any case wait here
+	 * until the offer processing has moved beyond the
+	 * point where the channel is discoverable.
 	 */
-	rc_work = kzalloc(sizeof(struct vmbus_rescind_work), GFP_KERNEL);
-	if (!rc_work) {
-		pr_err("Unable to allocate memory for rescind processing ");
+
+	while (atomic_read(&vmbus_connection.offer_in_progress) != 0) {
+		/*
+		 * We wait here until any channel offer is currently
+		 * being processed.
+		 */
+		msleep(1);
+	}
+
+	mutex_lock(&vmbus_connection.channel_mutex);
+	channel = relid2channel(rescind->child_relid);
+	mutex_unlock(&vmbus_connection.channel_mutex);
+
+	if (channel == NULL) {
+		/*
+		 * We failed in processing the offer message;
+		 * we would have cleaned up the relid in that
+		 * failure path.
+		 */
 		return;
 	}
-	rc_work->channel = channel;
-	INIT_WORK(&rc_work->work, process_rescind_fn);
-	schedule_work(&rc_work->work);
+	
+	spin_lock_irqsave(&channel->lock, flags);
+	channel->rescind = true;
+	spin_unlock_irqrestore(&channel->lock, flags);
+
+	vmbus_rescind_cleanup(channel);
+
+	if (channel->device_obj) {
+		if (channel->chn_rescind_callback) {
+			channel->chn_rescind_callback(channel);
+			return;
+		}
+
+		/*
+		 * We will have to unregister this device from the
+		 * driver core.
+		 */
+		dev = get_device(&channel->device_obj->device);
+		if (dev) {
+			vmbus_device_unregister(channel->device_obj);
+			put_device(dev);
+		}
+	}
+	if (channel->primary_channel != NULL) {
+		/*
+		 * Sub-channel is being rescinded. Following is the channel
+		 * close sequence when initiated from the driveri (refer to
+		 * vmbus_close() for details):
+		 * 1. Close all sub-channels first
+		 * 2. Then close the primary channel.
+		 */
+		if (channel->state == CHANNEL_OPEN_STATE) {
+			/*
+			 * The channel is currently not open;
+			 * it is safe for us to cleanup the channel.
+			 */
+			mutex_lock(&vmbus_connection.channel_mutex);
+			hv_process_channel_removal(channel,
+						channel->offermsg.child_relid);
+			mutex_unlock(&vmbus_connection.channel_mutex);
+		}
+	}
 }
 
 
