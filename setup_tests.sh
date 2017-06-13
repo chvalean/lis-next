@@ -17,7 +17,7 @@ elif [[ "$BUILD" == "7."* ]]; then
   docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "wget http://88.208.217.170/${BUILD}/os/x86_64/Packages/kernel-devel-${KERNEL}.el7.x86_64.rpm"
 fi
 
-if [[ "$BUILD" == "6.8" ]] || [[ "$BUILD" == "6.9" ]]; then
+if [[ "$BUILD" == "6.9" ]]; then
   docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "wget http://mirror.centos.org/centos/${BUILD}/os/x86_64/Packages/kernel-devel-${KERNEL}.el6.x86_64.rpm"
 elif [[ "$BUILD" == "6."* ]]; then
   docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "wget http://88.208.217.170/${BUILD}/os/x86_64/Packages/kernel-devel-${KERNEL}.el6.x86_64.rpm"
