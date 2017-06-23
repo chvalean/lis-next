@@ -1221,7 +1221,7 @@ int rndis_filter_device_add(struct hv_device *dev,
 	if (ret)
 		goto err_dev_remv;
 
-	device_info->link_state = rndis_device->link_state;
+	rndis_filter_query_device_link_status(rndis_device);
 
 	netdev_dbg(net, "Device MAC %pM link state %s\n",
 		   rndis_device->hw_mac_adr,
