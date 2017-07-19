@@ -69,6 +69,7 @@ done
 
 function create_eth_cfg_redhat {
 	local fn=$cfgdir/ifcfg-$1
+	dhcp_hostname=$(grep 'DHCP_HOSTNAME' $fn)
 
 	rm -f $fn
 	echo DEVICE=$1 >>$fn
@@ -80,6 +81,10 @@ function create_eth_cfg_redhat {
 	echo IPV6INIT=yes >>$fn
 	echo MASTER=$2 >>$fn
 	echo SLAVE=yes >>$fn
+
+	if [ "$1" == "eth0" -o "$1" == "vf1" ]; then
+		echo "NM_CONTROLLED=no" >>$fn
+	fi
 }
 
 function create_eth_cfg_pri_redhat {
@@ -99,6 +104,13 @@ function create_bond_cfg_redhat {
 	echo IPV6INIT=yes >>$fn
 	echo BONDING_MASTER=yes >>$fn
 	echo BONDING_OPTS=\"mode=active-backup miimon=100 primary=$2\" >>$fn
+
+	if [ "$1" == "bond0" ]; then
+		echo "NM_CONTROLLED=no" >>$fn
+	fi
+	if [ "$dhcp_hostname" != "" ]; then
+		echo "$dhcp_hostname" >>$fn
+	fi
 }
 
 function del_eth_cfg_ubuntu {
@@ -211,6 +223,30 @@ function create_bond {
 
 	echo $'\nBond name:' $bondname
 
+	if [ $distro == ubuntu ]
+	then
+		local mainfn=$cfgdir/interfaces
+		local s="^[ \t]*(auto|iface|mapping|allow-.*)[ \t]+${bondname}"
+
+		grep -E "$s" $mainfn
+		if [ $? -eq 0 ]
+		then
+			echo "WARNING: ${bondname} has been configured already"
+			return
+		fi
+	elif [ $distro == redhat ] || [ $distro == suse ]
+	then
+		local fn=$cfgdir/ifcfg-$bondname
+		if [ -f $fn ]
+		then
+			echo "WARNING: ${bondname} has been configured already"
+			return
+		fi
+	else
+		echo "Unsupported Distro: ${distro}"
+		return
+	fi
+
 	echo configuring $primary
 	create_eth_cfg_pri_$distro $primary $bondname
 
@@ -219,8 +255,6 @@ function create_bond {
 
 	echo creating: $bondname with primary slave: $primary
 	create_bond_cfg_$distro $bondname $primary $secondary
-
-	let bondcnt=bondcnt+1
 }
 
 for (( i=0; i < $eth_cnt-1; i++ ))
@@ -228,5 +262,6 @@ do
         if [ -n "${list_match[$i]}" ]
         then
 		create_bond ${list_eth[$i]} ${list_match[$i]}
+		let bondcnt=bondcnt+1
         fi
 done
