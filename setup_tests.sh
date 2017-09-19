@@ -11,7 +11,7 @@ docker logs $DOCKER_CONTAINER_ID
 docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "cat /etc/centos-release"
 docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "yum -y -q install automake make gcc wget"
 
-if [[ "$BUILD" == "7.3.1611" ]]; then
+if [[ "$BUILD" == "7.4.1708" ]]; then
   docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "wget http://mirror.centos.org/centos/7/os/x86_64/Packages/kernel-devel-${KERNEL}.el7.x86_64.rpm"
 elif [[ "$BUILD" == "7."* ]]; then
   docker exec -t $DOCKER_CONTAINER_ID /bin/bash -xec "wget http://88.208.217.170/${BUILD}/os/x86_64/Packages/kernel-devel-${KERNEL}.el7.x86_64.rpm"
