@@ -1,0 +1,30 @@
+From cec9fcf27bcaf99d3da42498d44eccc7b78e46f4 Mon Sep 17 00:00:00 2001
+From: Haiyang Zhang <haiyangz@microsoft.com>
+Date: Tue, 16 Jan 2018 13:10:09 -0700
+Subject: [PATCH net-next] hv_netvsc: Change the default number of channel to 16
+Reply-To: haiyangz@microsoft.com
+
+For performance, we increase the default number of channel to 16.
+We still limit the number of channels to the number of processors
+on one NUMA node.
+
+Signed-off-by: Haiyang Zhang <haiyangz@microsoft.com>
+---
+ drivers/net/hyperv/hyperv_net.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/net/hyperv/hyperv_net.h b/drivers/net/hyperv/hyperv_net.h
+index 0db3bd1ea06f..2c9951064d4a 100644
+--- a/drivers/net/hyperv/hyperv_net.h
++++ b/drivers/net/hyperv/hyperv_net.h
+@@ -667,7 +667,7 @@ struct nvsp_message {
+
+ #define VRSS_SEND_TAB_SIZE 16  /* must be power of 2 */
+ #define VRSS_CHANNEL_MAX 64
+-#define VRSS_CHANNEL_DEFAULT 8
++#define VRSS_CHANNEL_DEFAULT 16
+
+ #define RNDIS_MAX_PKT_DEFAULT 8
+ #define RNDIS_PKT_ALIGN_DEFAULT 8
+--
+2.15.1
